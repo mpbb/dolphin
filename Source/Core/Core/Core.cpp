@@ -59,6 +59,7 @@
 #include "Core/HW/GCKeyboard.h"
 #include "Core/HW/GCPad.h"
 #include "Core/HW/HW.h"
+#include "Core/HW/Memmap.h"
 #include "Core/HW/SystemTimers.h"
 #include "Core/HW/VideoInterface.h"
 #include "Core/HW/Wiimote.h"
@@ -95,6 +96,8 @@
 #include "VideoCommon/Present.h"
 #include "VideoCommon/VideoBackendBase.h"
 #include "VideoCommon/VideoEvents.h"
+
+#include "RackAttack.h"
 
 namespace Core
 {
@@ -168,6 +171,7 @@ void FrameUpdateOnCPUThread()
 
 void OnFrameEnd()
 {
+  RackAttack::Update();
 #ifdef USE_MEMORYWATCHER
   if (s_memory_watcher)
   {
@@ -269,6 +273,9 @@ bool Init(Core::System& system, std::unique_ptr<BootParameters> boot, const Wind
   // Start the emu thread
   s_is_booting.Set();
   s_emu_thread = std::thread(EmuThread, std::ref(system), std::move(boot), prepared_wsi);
+
+  RackAttack::Init();
+
   return true;
 }
 

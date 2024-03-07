@@ -18,6 +18,9 @@
 #include "Core/System.h"
 #include "VideoCommon/Fifo.h"
 
+//#include "PerfectBreak.h"
+//#include "RackAttack.h"
+
 namespace CPU
 {
 CPUManager::CPUManager(Core::System& system) : m_system(system)
@@ -71,6 +74,9 @@ void CPUManager::Run()
   // We can't rely on PowerPC::Init doing it, since it's called from EmuThread.
   PowerPC::RoundingModeUpdated(power_pc.GetPPCState());
 
+  //PerfectBreak::init(m_system);
+  //RackAttack::Init();
+
   std::unique_lock state_lock(m_state_change_lock);
   while (m_state != State::PowerDown)
   {
@@ -113,6 +119,12 @@ void CPUManager::Run()
 
     case State::Stepping:
       // Wait for step command.
+      state_lock.unlock();
+
+      //PerfectBreak::update(m_system);
+      //RackAttack::Update();
+
+      state_lock.lock();
       m_state_cpu_cvar.wait(state_lock, [this, &state_lock, &gdb_step_sync_event] {
         ExecutePendingJobs(state_lock);
         CPUThreadConfigCallback::CheckForConfigChanges();
